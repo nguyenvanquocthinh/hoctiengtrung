@@ -22,10 +22,9 @@
               success: "#00B42A",
               danger: "#F53F3F",
               neutral: "#F2F3F5",
+              recording: "#EF4444",
             },
-            fontFamily: {
-              sans: ["Inter", "system-ui", "sans-serif"],
-            },
+            fontFamily: { sans: ["Inter", "system-ui", "sans-serif"] },
           },
         },
       };
@@ -41,6 +40,20 @@
         .btn-touch {
           min-height: 48px;
         }
+        .pulse-recording {
+          animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+          0% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+          }
+          70% {
+            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+          }
+        }
       }
     </style>
   </head>
@@ -52,12 +65,11 @@
           <i class="fa fa-comments-o mr-2"></i> AI Hỏi Việt - Trả Lời Trung
         </h1>
         <p class="text-center mt-2 text-white/90 text-sm">
-          Thêm câu hỏi → Lưu lại → Luyện tập mọi lúc
+          Thêm câu hỏi → Nói trả lời → AI đánh giá
         </p>
       </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container mx-auto px-3 py-5 max-w-2xl space-y-5">
       <!-- Add Custom Question Section -->
       <section class="bg-white rounded-xl card-shadow p-4">
@@ -69,7 +81,6 @@
           </div>
           <h2 class="text-lg font-semibold text-gray-800">Thêm câu hỏi</h2>
         </div>
-
         <div class="space-y-3 mb-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
@@ -94,14 +105,12 @@
             />
           </div>
         </div>
-
         <button
           id="btn-add-question"
           class="w-full bg-secondary hover:bg-secondary/90 text-white font-medium py-3 px-4 rounded-lg transition-all btn-touch"
         >
           <i class="fa fa-save mr-1.5"></i> Lưu câu hỏi
         </button>
-
         <p id="save-message" class="mt-3 text-sm hidden"></p>
       </section>
 
@@ -125,7 +134,6 @@
             <i class="fa fa-trash-o"></i>
           </button>
         </div>
-
         <div
           id="question-list"
           class="max-h-[200px] overflow-y-auto space-y-2 text-sm"
@@ -146,7 +154,6 @@
           </div>
           <h2 class="text-lg font-semibold text-gray-800">Câu hỏi</h2>
         </div>
-
         <div
           id="question-container"
           class="bg-neutral rounded-lg p-4 min-h-[80px] text-base leading-relaxed"
@@ -155,7 +162,6 @@
             Nhấn nút bên dưới để nhận câu hỏi...
           </p>
         </div>
-
         <button
           id="btn-get-question"
           class="w-full mt-4 bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-all btn-touch"
@@ -164,28 +170,37 @@
         </button>
       </section>
 
-      <!-- Your Answer Section -->
+      <!-- Your Answer Section - Có Giọng Nói -->
       <section class="bg-white rounded-xl card-shadow p-4">
         <div class="flex items-center mb-3">
           <div
             class="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center mr-2.5"
           >
-            <i class="fa fa-user text-secondary text-lg"></i>
+            <i class="fa fa-microphone text-secondary text-lg"></i>
           </div>
           <h2 class="text-lg font-semibold text-gray-800">
             Trả lời tiếng Trung
           </h2>
         </div>
 
+        <!-- Nút Nói -->
+        <button
+          id="btn-record"
+          class="w-full mb-3 border-2 border-secondary text-secondary hover:bg-secondary/5 font-medium py-3 px-4 rounded-lg transition-all btn-touch flex items-center justify-center gap-2"
+        >
+          <i class="fa fa-microphone"></i>
+          <span id="record-text">Nhấn để nói bằng tiếng Trung</span>
+        </button>
+
         <textarea
           id="user-answer"
-          class="w-full border border-gray-200 rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 min-h-[100px]"
-          placeholder="Nhập câu trả lời bằng chữ Hán..."
+          class="w-full border border-gray-200 rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 min-h-[80px]"
+          placeholder="Nội dung bạn nói sẽ hiển thị ở đây..."
         ></textarea>
 
         <button
           id="btn-submit"
-          class="w-full mt-4 bg-success hover:bg-success/90 text-white font-medium py-3 px-4 rounded-lg transition-all btn-touch"
+          class="w-full mt-3 bg-success hover:bg-success/90 text-white font-medium py-3 px-4 rounded-lg transition-all btn-touch"
         >
           <i class="fa fa-paper-plane mr-1.5"></i> Gửi & Đánh giá
         </button>
@@ -204,12 +219,10 @@
           </div>
           <h2 class="text-lg font-semibold text-gray-800">Kết quả đánh giá</h2>
         </div>
-
         <div id="evaluation-content" class="space-y-3 text-base"></div>
       </section>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-800 text-white py-4 mt-6">
       <div class="container mx-auto px-4 text-center text-sm">
         <p>AI Hỏi Việt Trả Lời Trung - Học mọi lúc mọi nơi</p>
@@ -243,8 +256,91 @@
       const newQuestionZhEl = document.getElementById("new-question-zh");
       const saveMessageEl = document.getElementById("save-message");
       const btnClearAll = document.getElementById("btn-clear-all");
+      const btnRecord = document.getElementById("btn-record");
+      const recordText = document.getElementById("record-text");
 
       let currentQuestion = null;
+      let recognition = null;
+      let isRecording = false;
+
+      // ===== KHỞI TẠO NHẬN DIỆN GIỌNG NÓI =====
+      function initSpeechRecognition() {
+        const SpeechRecognition =
+          window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+          btnRecord.disabled = true;
+          btnRecord.innerHTML =
+            '<i class="fa fa-exclamation-triangle"></i> Trình duyệt không hỗ trợ giọng nói';
+          btnRecord.classList.add("opacity-50", "cursor-not-allowed");
+          return null;
+        }
+
+        recognition = new SpeechRecognition();
+        recognition.lang = "zh-CN"; // Nhận diện tiếng Trung
+        recognition.continuous = false;
+        recognition.interimResults = true;
+
+        recognition.onstart = () => {
+          isRecording = true;
+          btnRecord.classList.add(
+            "bg-recording/10",
+            "border-recording",
+            "pulse-recording",
+          );
+          btnRecord.classList.remove("border-secondary", "text-secondary");
+          btnRecord.classList.add("text-recording");
+          recordText.textContent = "Đang nghe... Nói tiếng Trung của bạn!";
+        };
+
+        recognition.onresult = (event) => {
+          let transcript = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          userAnswerEl.value = transcript;
+        };
+
+        recognition.onend = () => {
+          isRecording = false;
+          btnRecord.classList.remove(
+            "bg-recording/10",
+            "border-recording",
+            "pulse-recording",
+          );
+          btnRecord.classList.add("border-secondary", "text-secondary");
+          recordText.textContent = "Nhấn để nói bằng tiếng Trung";
+        };
+
+        recognition.onerror = (event) => {
+          isRecording = false;
+          btnRecord.classList.remove(
+            "bg-recording/10",
+            "border-recording",
+            "pulse-recording",
+          );
+          btnRecord.classList.add("border-secondary", "text-secondary");
+          recordText.textContent = "Lỗi: Thử lại";
+          if (event.error === "not-allowed") {
+            alert("Vui lòng cấp quyền truy cập micro cho trang web!");
+          }
+        };
+
+        return recognition;
+      }
+
+      // Nút Ghi Âm
+      btnRecord.addEventListener("click", () => {
+        if (!recognition) {
+          alert("Trình duyệt không hỗ trợ nhận diện giọng nói!");
+          return;
+        }
+        if (isRecording) {
+          recognition.stop();
+        } else {
+          userAnswerEl.value = "";
+          recognition.start();
+        }
+      });
 
       // ===== LƯU DỮ LIỆU =====
       function saveQuestions() {
@@ -254,31 +350,29 @@
       // ===== HIỂN THỊ DANH SÁCH =====
       function renderQuestionList() {
         questionCountEl.textContent = questionList.length;
-
         if (questionList.length === 0) {
           questionListEl.innerHTML =
             '<p class="text-gray-400 italic">Chưa có câu hỏi nào. Hãy thêm ở trên!</p>';
           return;
         }
-
         questionListEl.innerHTML = questionList
           .map(
             (q, index) => `
-                <div class="flex items-start justify-between p-2.5 bg-gray-50 rounded-lg gap-2">
-                    <div class="flex-1 min-w-0">
-                        <p class="font-medium text-gray-800 text-sm truncate">${index + 1}. ${q.vi}</p>
-                        <p class="text-gray-500 text-xs mt-0.5 truncate">→ ${q.zhCorrect}</p>
-                    </div>
-                    <div class="flex items-center gap-0.5 shrink-0">
-                        <button class="ask-question-btn text-primary p-1.5" data-index="${index}">
-                            <i class="fa fa-play-circle"></i>
-                        </button>
-                        <button class="delete-question-btn text-danger p-1.5" data-index="${index}">
-                            <i class="fa fa-times-circle"></i>
-                        </button>
-                    </div>
-                </div>
-            `,
+        <div class="flex items-start justify-between p-2.5 bg-gray-50 rounded-lg gap-2">
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-gray-800 text-sm truncate">${index + 1}. ${q.vi}</p>
+            <p class="text-gray-500 text-xs mt-0.5 truncate">→ ${q.zhCorrect}</p>
+          </div>
+          <div class="flex items-center gap-0.5 shrink-0">
+            <button class="ask-question-btn text-primary p-1.5" data-index="${index}">
+              <i class="fa fa-play-circle"></i>
+            </button>
+            <button class="delete-question-btn text-danger p-1.5" data-index="${index}">
+              <i class="fa fa-times-circle"></i>
+            </button>
+          </div>
+        </div>
+      `,
           )
           .join("");
 
@@ -287,7 +381,6 @@
             showQuestion(parseInt(btn.dataset.index)),
           );
         });
-
         document.querySelectorAll(".delete-question-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
             if (confirm("Xóa câu hỏi này?")) {
@@ -303,22 +396,18 @@
       btnAddQuestion.addEventListener("click", () => {
         const vi = newQuestionViEl.value.trim();
         const zh = newQuestionZhEl.value.trim();
-
         if (!vi || !zh) {
           saveMessageEl.textContent = "⚠️ Vui lòng điền đầy đủ!";
           saveMessageEl.className = "mt-3 text-sm text-amber-500";
           saveMessageEl.classList.remove("hidden");
           return;
         }
-
         questionList.push({ vi, zhCorrect: zh });
         saveQuestions();
         renderQuestionList();
-
         saveMessageEl.textContent = "✅ Đã lưu thành công!";
         saveMessageEl.className = "mt-3 text-sm text-success";
         saveMessageEl.classList.remove("hidden");
-
         newQuestionViEl.value = "";
         newQuestionZhEl.value = "";
         setTimeout(() => saveMessageEl.classList.add("hidden"), 3000);
@@ -356,52 +445,68 @@
 
       // ===== ĐÁNH GIÁ =====
       function evaluateAnswer(userAnswer, correctAnswer) {
-        const normalize = (str) => str.replace(/\s+/g, "").trim();
+        const normalize = (str) => str.replace(/[，。！？、\s]+/g, "").trim();
         const userNorm = normalize(userAnswer);
         const correctNorm = normalize(correctAnswer);
+
+        if (!userNorm) {
+          return {
+            score: 0,
+            status: "empty",
+            feedback: ["⚠️ Chưa có nội dung trả lời!"],
+          };
+        }
 
         if (userNorm === correctNorm) {
           return {
             score: 10,
             status: "excellent",
             feedback: [
-              "✅ Câu trả lời hoàn toàn chính xác!",
-              "✅ Ngữ pháp & từ vựng đúng chuẩn.",
+              "✅ Câu trả lời HOÀN TOÀN CHÍNH XÁC!",
+              "✅ Ngữ pháp & từ vựng đều đúng chuẩn.",
             ],
           };
         }
 
+        // Tính độ tương đồng
         let matchCount = 0;
-        for (let char of userNorm) if (correctNorm.includes(char)) matchCount++;
+        for (let char of userNorm) {
+          if (correctNorm.includes(char)) matchCount++;
+        }
         const similarity = matchCount / Math.max(correctNorm.length, 1);
 
-        if (similarity >= 0.8)
+        if (similarity >= 0.8) {
           return {
             score: 8,
             status: "good",
             feedback: [
-              "👍 Rất tốt, chỉ thiếu một chút.",
+              "👍 Rất tốt! Chỉ thiếu một chút nhỏ.",
+              `📝 Bạn nói: ${userAnswer}`,
               `✅ Đáp án đúng: ${correctAnswer}`,
-              "💡 Viết đầy đủ câu sẽ chính xác hơn.",
+              "💡 Nói chậm và rõ hơn để chính xác hơn.",
             ],
           };
-        if (similarity >= 0.5)
+        }
+        if (similarity >= 0.5) {
           return {
             score: 6,
             status: "medium",
             feedback: [
-              "⚠️ Ý đúng nhưng chưa chính xác.",
+              "⚠️ Ý đúng nhưng chưa chính xác lắm.",
+              `📝 Bạn nói: ${userAnswer}`,
               `✅ Đáp án đúng: ${correctAnswer}`,
-              "💡 Xem lại cấu trúc & từ vựng.",
+              "💡 Xem lại cách phát âm & cấu trúc câu.",
             ],
           };
+        }
         return {
           score: 3,
           status: "low",
           feedback: [
             "❌ Chưa đúng nội dung chính.",
+            `📝 Bạn nói: ${userAnswer}`,
             `✅ Đáp án đúng: ${correctAnswer}`,
-            "💡 Dịch sát nghĩa hơn nhé.",
+            "💡 Nghe lại và luyện phát âm từng từ nhé.",
           ],
         };
       }
@@ -409,8 +514,6 @@
       btnSubmit.addEventListener("click", () => {
         if (!currentQuestion) return alert("Vui lòng nhận câu hỏi trước!");
         const userAnswer = userAnswerEl.value.trim();
-        if (!userAnswer) return alert("Vui lòng nhập câu trả lời!");
-
         btnSubmit.innerHTML =
           '<i class="fa fa-spinner fa-spin mr-1.5"></i> Đang đánh giá...';
         btnSubmit.disabled = true;
@@ -418,6 +521,7 @@
         setTimeout(() => {
           const result = evaluateAnswer(userAnswer, currentQuestion.zhCorrect);
           const statusMap = {
+            empty: { color: "text-amber-500", text: "Chưa có nội dung" },
             excellent: { color: "text-success", text: "Xuất sắc" },
             good: { color: "text-blue-500", text: "Tốt" },
             medium: { color: "text-amber-500", text: "Cần cải thiện" },
@@ -426,23 +530,23 @@
           const { color, text: statusText } = statusMap[result.status];
 
           evaluationContent.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="text-2xl font-bold ${color}">${result.score}/10</div>
-                        <div class="font-medium ${color}">${statusText}</div>
-                    </div>
-                    <div class="bg-gray-50 rounded-lg p-3 space-y-2 mt-2">
-                        ${result.feedback.map((item) => `<p>${item}</p>`).join("")}
-                    </div>
-                `;
+          <div class="flex items-center gap-3">
+            <div class="text-2xl font-bold ${color}">${result.score}/10</div>
+            <div class="font-medium ${color}">${statusText}</div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 space-y-2 mt-2">
+            ${result.feedback.map((item) => `<p>${item}</p>`).join("")}
+          </div>
+        `;
           evaluationSection.classList.remove("hidden");
-
           btnSubmit.innerHTML =
             '<i class="fa fa-paper-plane mr-1.5"></i> Gửi & Đánh giá';
           btnSubmit.disabled = false;
-        }, 1000);
+        }, 800);
       });
 
       // ===== KHỞI TẠO =====
+      initSpeechRecognition();
       renderQuestionList();
     </script>
   </body>
