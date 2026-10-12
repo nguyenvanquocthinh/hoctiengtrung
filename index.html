@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>AI Hỏi Việt - Trả Lời Trung</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#165DFF",
+              secondary: "#36CBCB",
+              success: "#00B42A",
+              danger: "#F53F3F",
+              neutral: "#F2F3F5",
+            },
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .gradient-bg {
+          background: linear-gradient(135deg, #165dff 0%, #36cbcb 100%);
+        }
+        .card-shadow {
+          box-shadow: 0 6px 20px rgba(22, 93, 255, 0.12);
+        }
+        .btn-touch {
+          min-height: 48px;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 min-h-screen font-sans text-base">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-5 shadow-lg">
+      <div class="container mx-auto px-4">
+        <h1 class="text-xl font-bold text-center leading-tight">
+          <i class="fa fa-comments-o mr-2"></i> AI Hỏi Việt - Trả Lời Trung
+        </h1>
+        <p class="text-center mt-2 text-white/90 text-sm">
+          Thêm câu hỏi → Lưu lại → Luyện tập mọi lúc
+        </p>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-3 py-5 max-w-2xl space-y-5">
+      <!-- Add Custom Question Section -->
+      <section class="bg-white rounded-xl card-shadow p-4">
+        <div class="flex items-center mb-3">
+          <div
+            class="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center mr-2.5"
+          >
+            <i class="fa fa-plus-circle text-secondary text-lg"></i>
+          </div>
+          <h2 class="text-lg font-semibold text-gray-800">Thêm câu hỏi</h2>
+        </div>
+
+        <div class="space-y-3 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Câu hỏi tiếng Việt</label
+            >
+            <input
+              type="text"
+              id="new-question-vi"
+              class="w-full border border-gray-200 rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/50"
+              placeholder="VD: Bạn tên gì?"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Đáp án tiếng Trung</label
+            >
+            <input
+              type="text"
+              id="new-question-zh"
+              class="w-full border border-gray-200 rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/50"
+              placeholder="VD: 你叫什么名字？"
+            />
+          </div>
+        </div>
+
+        <button
+          id="btn-add-question"
+          class="w-full bg-secondary hover:bg-secondary/90 text-white font-medium py-3 px-4 rounded-lg transition-all btn-touch"
+        >
+          <i class="fa fa-save mr-1.5"></i> Lưu câu hỏi
+        </button>
+
+        <p id="save-message" class="mt-3 text-sm hidden"></p>
+      </section>
+
+      <!-- Question List -->
+      <section class="bg-white rounded-xl card-shadow p-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center">
+            <div
+              class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center mr-2.5"
+            >
+              <i class="fa fa-list-ul text-primary text-lg"></i>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-800">
+              Danh sách (<span id="question-count">0</span>)
+            </h2>
+          </div>
+          <button
+            id="btn-clear-all"
+            class="text-danger hover:text-danger/80 text-sm"
+          >
+            <i class="fa fa-trash-o"></i>
+          </button>
+        </div>
+
+        <div
+          id="question-list"
+          class="max-h-[200px] overflow-y-auto space-y-2 text-sm"
+        >
+          <p class="text-gray-400 italic">
+            Chưa có câu hỏi nào. Hãy thêm ở trên!
+          </p>
+        </div>
+      </section>
+
+      <!-- AI Question Section -->
+      <section class="bg-white rounded-xl card-shadow p-4">
+        <div class="flex items-center mb-3">
+          <div
+            class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center mr-2.5"
+          >
+            <i class="fa fa-robot text-primary text-lg"></i>
+          </div>
+          <h2 class="text-lg font-semibold text-gray-800">Câu hỏi</h2>
+        </div>
+
+        <div
+          id="question-container"
+          class="bg-neutral rounded-lg p-4 min-h-[80px] text-base leading-relaxed"
+        >
+          <p class="text-gray-500 italic">
+            Nhấn nút bên dưới để nhận câu hỏi...
+          </p>
+        </div>
+
+        <button
+          id="btn-get-question"
+          class="w-full mt-4 bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-all btn-touch"
+        >
+          <i class="fa fa-refresh mr-1.5"></i> Tạo câu hỏi ngẫu nhiên
+        </button>
+      </section>
+
+      <!-- Your Answer Section -->
+      <section class="bg-white rounded-xl card-shadow p-4">
+        <div class="flex items-center mb-3">
+          <div
+            class="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center mr-2.5"
+          >
+            <i class="fa fa-user text-secondary text-lg"></i>
+          </div>
+          <h2 class="text-lg font-semibold text-gray-800">
+            Trả lời tiếng Trung
+          </h2>
+        </div>
+
+        <textarea
+          id="user-answer"
+          class="w-full border border-gray-200 rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 min-h-[100px]"
+          placeholder="Nhập câu trả lời bằng chữ Hán..."
+        ></textarea>
+
+        <button
+          id="btn-submit"
+          class="w-full mt-4 bg-success hover:bg-success/90 text-white font-medium py-3 px-4 rounded-lg transition-all btn-touch"
+        >
+          <i class="fa fa-paper-plane mr-1.5"></i> Gửi & Đánh giá
+        </button>
+      </section>
+
+      <!-- AI Evaluation Section -->
+      <section
+        id="evaluation-section"
+        class="bg-white rounded-xl card-shadow p-4 hidden"
+      >
+        <div class="flex items-center mb-3">
+          <div
+            class="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center mr-2.5"
+          >
+            <i class="fa fa-check-square-o text-amber-500 text-lg"></i>
+          </div>
+          <h2 class="text-lg font-semibold text-gray-800">Kết quả đánh giá</h2>
+        </div>
+
+        <div id="evaluation-content" class="space-y-3 text-base"></div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-4 mt-6">
+      <div class="container mx-auto px-4 text-center text-sm">
+        <p>AI Hỏi Việt Trả Lời Trung - Học mọi lúc mọi nơi</p>
+      </div>
+    </footer>
+
+    <script>
+      // ===== DỮ LIỆU =====
+      let questionList = JSON.parse(
+        localStorage.getItem("customQuestions"),
+      ) || [
+        {
+          vi: "Bạn tên là gì và bao nhiêu tuổi?",
+          zhCorrect: "你叫什么名字，今年几岁了？",
+        },
+        { vi: "Hôm nay thời tiết thế nào?", zhCorrect: "今天天气怎么样？" },
+        { vi: "Bạn thích ăn món gì?", zhCorrect: "你喜欢吃什么菜？" },
+      ];
+
+      // DOM Elements
+      const questionContainer = document.getElementById("question-container");
+      const btnGetQuestion = document.getElementById("btn-get-question");
+      const userAnswerEl = document.getElementById("user-answer");
+      const btnSubmit = document.getElementById("btn-submit");
+      const evaluationSection = document.getElementById("evaluation-section");
+      const evaluationContent = document.getElementById("evaluation-content");
+      const questionListEl = document.getElementById("question-list");
+      const questionCountEl = document.getElementById("question-count");
+      const btnAddQuestion = document.getElementById("btn-add-question");
+      const newQuestionViEl = document.getElementById("new-question-vi");
+      const newQuestionZhEl = document.getElementById("new-question-zh");
+      const saveMessageEl = document.getElementById("save-message");
+      const btnClearAll = document.getElementById("btn-clear-all");
+
+      let currentQuestion = null;
+
+      // ===== LƯU DỮ LIỆU =====
+      function saveQuestions() {
+        localStorage.setItem("customQuestions", JSON.stringify(questionList));
+      }
+
+      // ===== HIỂN THỊ DANH SÁCH =====
+      function renderQuestionList() {
+        questionCountEl.textContent = questionList.length;
+
+        if (questionList.length === 0) {
+          questionListEl.innerHTML =
+            '<p class="text-gray-400 italic">Chưa có câu hỏi nào. Hãy thêm ở trên!</p>';
+          return;
+        }
+
+        questionListEl.innerHTML = questionList
+          .map(
+            (q, index) => `
+                <div class="flex items-start justify-between p-2.5 bg-gray-50 rounded-lg gap-2">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium text-gray-800 text-sm truncate">${index + 1}. ${q.vi}</p>
+                        <p class="text-gray-500 text-xs mt-0.5 truncate">→ ${q.zhCorrect}</p>
+                    </div>
+                    <div class="flex items-center gap-0.5 shrink-0">
+                        <button class="ask-question-btn text-primary p-1.5" data-index="${index}">
+                            <i class="fa fa-play-circle"></i>
+                        </button>
+                        <button class="delete-question-btn text-danger p-1.5" data-index="${index}">
+                            <i class="fa fa-times-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+
+        document.querySelectorAll(".ask-question-btn").forEach((btn) => {
+          btn.addEventListener("click", () =>
+            showQuestion(parseInt(btn.dataset.index)),
+          );
+        });
+
+        document.querySelectorAll(".delete-question-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (confirm("Xóa câu hỏi này?")) {
+              questionList.splice(parseInt(btn.dataset.index), 1);
+              saveQuestions();
+              renderQuestionList();
+            }
+          });
+        });
+      }
+
+      // ===== THÊM CÂU HỎI =====
+      btnAddQuestion.addEventListener("click", () => {
+        const vi = newQuestionViEl.value.trim();
+        const zh = newQuestionZhEl.value.trim();
+
+        if (!vi || !zh) {
+          saveMessageEl.textContent = "⚠️ Vui lòng điền đầy đủ!";
+          saveMessageEl.className = "mt-3 text-sm text-amber-500";
+          saveMessageEl.classList.remove("hidden");
+          return;
+        }
+
+        questionList.push({ vi, zhCorrect: zh });
+        saveQuestions();
+        renderQuestionList();
+
+        saveMessageEl.textContent = "✅ Đã lưu thành công!";
+        saveMessageEl.className = "mt-3 text-sm text-success";
+        saveMessageEl.classList.remove("hidden");
+
+        newQuestionViEl.value = "";
+        newQuestionZhEl.value = "";
+        setTimeout(() => saveMessageEl.classList.add("hidden"), 3000);
+      });
+
+      // ===== XÓA TẤT CẢ =====
+      btnClearAll.addEventListener("click", () => {
+        if (questionList.length === 0) return;
+        if (confirm("Xóa TẤT CẢ câu hỏi? Không thể hoàn tác!")) {
+          questionList = [];
+          saveQuestions();
+          renderQuestionList();
+        }
+      });
+
+      // ===== HIỂN THỊ CÂU HỎI =====
+      function showQuestion(index) {
+        currentQuestion = questionList[index];
+        questionContainer.innerHTML = `<p class="font-medium">${currentQuestion.vi}</p>`;
+        questionContainer.classList.add("text-gray-800");
+        userAnswerEl.value = "";
+        evaluationSection.classList.add("hidden");
+        document
+          .getElementById("user-answer")
+          .scrollIntoView({ behavior: "smooth" });
+      }
+
+      btnGetQuestion.addEventListener("click", () => {
+        if (questionList.length === 0) {
+          alert("Danh sách trống! Vui lòng thêm câu hỏi trước.");
+          return;
+        }
+        showQuestion(Math.floor(Math.random() * questionList.length));
+      });
+
+      // ===== ĐÁNH GIÁ =====
+      function evaluateAnswer(userAnswer, correctAnswer) {
+        const normalize = (str) => str.replace(/\s+/g, "").trim();
+        const userNorm = normalize(userAnswer);
+        const correctNorm = normalize(correctAnswer);
+
+        if (userNorm === correctNorm) {
+          return {
+            score: 10,
+            status: "excellent",
+            feedback: [
+              "✅ Câu trả lời hoàn toàn chính xác!",
+              "✅ Ngữ pháp & từ vựng đúng chuẩn.",
+            ],
+          };
+        }
+
+        let matchCount = 0;
+        for (let char of userNorm) if (correctNorm.includes(char)) matchCount++;
+        const similarity = matchCount / Math.max(correctNorm.length, 1);
+
+        if (similarity >= 0.8)
+          return {
+            score: 8,
+            status: "good",
+            feedback: [
+              "👍 Rất tốt, chỉ thiếu một chút.",
+              `✅ Đáp án đúng: ${correctAnswer}`,
+              "💡 Viết đầy đủ câu sẽ chính xác hơn.",
+            ],
+          };
+        if (similarity >= 0.5)
+          return {
+            score: 6,
+            status: "medium",
+            feedback: [
+              "⚠️ Ý đúng nhưng chưa chính xác.",
+              `✅ Đáp án đúng: ${correctAnswer}`,
+              "💡 Xem lại cấu trúc & từ vựng.",
+            ],
+          };
+        return {
+          score: 3,
+          status: "low",
+          feedback: [
+            "❌ Chưa đúng nội dung chính.",
+            `✅ Đáp án đúng: ${correctAnswer}`,
+            "💡 Dịch sát nghĩa hơn nhé.",
+          ],
+        };
+      }
+
+      btnSubmit.addEventListener("click", () => {
+        if (!currentQuestion) return alert("Vui lòng nhận câu hỏi trước!");
+        const userAnswer = userAnswerEl.value.trim();
+        if (!userAnswer) return alert("Vui lòng nhập câu trả lời!");
+
+        btnSubmit.innerHTML =
+          '<i class="fa fa-spinner fa-spin mr-1.5"></i> Đang đánh giá...';
+        btnSubmit.disabled = true;
+
+        setTimeout(() => {
+          const result = evaluateAnswer(userAnswer, currentQuestion.zhCorrect);
+          const statusMap = {
+            excellent: { color: "text-success", text: "Xuất sắc" },
+            good: { color: "text-blue-500", text: "Tốt" },
+            medium: { color: "text-amber-500", text: "Cần cải thiện" },
+            low: { color: "text-danger", text: "Chưa đúng" },
+          };
+          const { color, text: statusText } = statusMap[result.status];
+
+          evaluationContent.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl font-bold ${color}">${result.score}/10</div>
+                        <div class="font-medium ${color}">${statusText}</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3 space-y-2 mt-2">
+                        ${result.feedback.map((item) => `<p>${item}</p>`).join("")}
+                    </div>
+                `;
+          evaluationSection.classList.remove("hidden");
+
+          btnSubmit.innerHTML =
+            '<i class="fa fa-paper-plane mr-1.5"></i> Gửi & Đánh giá';
+          btnSubmit.disabled = false;
+        }, 1000);
+      });
+
+      // ===== KHỞI TẠO =====
+      renderQuestionList();
+    </script>
+  </body>
+</html>
